@@ -57,6 +57,8 @@ class skyline_calc():
         ano_triger = False
         ano_time = 0
         ano_value = 0
+        
+        
 
         for i in range(starttime + 60 * 60, endtime, 60):
             data_value.append(data_dict[i])
