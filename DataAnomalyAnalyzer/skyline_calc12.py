@@ -14,6 +14,7 @@ from scipy.stats import t
 import sys
 from pandas.stats import moments
 import time
+from DataAnomalyAnalyzer.skyline_algorithms import run_selected_algorithm
 
 
 defaultencoding = 'utf-8'
@@ -35,7 +36,7 @@ class skyline_calc():
     def calc(self):
         load = ld.load_data()
         
-        data = load.csv('busi_yyt.csv')
+        data = load.csv('busi_users.csv')
         
         data_dict = dict(data)        
                 
@@ -49,43 +50,77 @@ class skyline_calc():
         data1_ano_y = []
         
         data2_ano_x = []
-        data2_ano_y = []        
+        data2_ano_y = []
+        
+        data2_ano_x_line = []
+        data2_ano_y_line = []        
+        
+        data3_ano_x = []
+        data3_ano_y = []
+        
+        data3_ano_x_line = []
+        data3_ano_y_line = []                 
         
         ano_count = 0
         ano_count_new = 0        
 
-        for i in range(starttime + 60 * 60, endtime, 60):
+        for i in range(starttime + 120 * 120, endtime, 120):
             data_value.append(data_dict[i])
             data_time.append(float((i - starttime)) / 3600)
             
             tmpdata = []
             tmpvalue = []
             
-            for j in range(i - 30 * 60, i + 60, 60):
+            for j in range(i - 120 * 120, i + 120, 120):
                 tmpdata.append((j, data_dict[j]))
                 tmpvalue.append(data_dict[j])
                 
             anomalous = median_absolute_deviation(tmpdata)
+            
+            anomalous1 = median_absolute_deviation(tmpdata)
+                        
+            anomalous2, ensemble, datatime, datapoint = run_selected_algorithm(tmpdata,'test')
+            
+            print('ensemble:'+str(ensemble))
+            time_local = time.localtime(i)            
+            print('datatime:'+str(time.strftime("%Y-%m-%d %H:%M:%S",time_local)))
+            print('datapoint:'+str(data_dict[i]))
+
+            
+            mean_value = np.mean(dict(tmpdata).values())
+            data2_ano_x_line.append(float((i - starttime)) / 3600)
+            data2_ano_y_line.append(mean_value)
+            
+            #maxmin_value = (np.max(dict(tmpdata).values()) + np.min(dict(tmpdata).values()))/2
+            median = np.median(dict(tmpdata).values())
+            
+            data3_ano_x_line.append(float((i - starttime)) / 3600)
+            data3_ano_y_line.append(median)
+            
             if anomalous:
                 ano_count += 1
                 data1_ano_x.append(float((i - starttime)) / 3600)
-                data1_ano_y.append(data_dict[i])                                         
-
-            anomalous1 = median_absolute_deviation_new(tmpdata)
-            
-            time_local = time.localtime(i)
-            
-            if anomalous1:
+                data1_ano_y.append(data_dict[i])
                 
-             
+                '''
                 # 异动点
                 if time_local[3] >= 7 and time_local[3] < 23:
                     data_filter = anomaly_filter(i, data)
                     if data_filter:
-                        if upanddown(tmpdata,1):
+                        #if upanddown(tmpdata,1):
                             ano_count_new+=1
                             data2_ano_x.append(float((i - starttime)) / 3600)
                             data2_ano_y.append(data_dict[i])
+                '''
+                                
+            if anomalous1:
+                data2_ano_x.append(float((i - starttime)) / 3600)
+                data2_ano_y.append(data_dict[i])                   
+                 
+            if anomalous2:
+                
+                data3_ano_x.append(float((i - starttime)) / 3600)
+                data3_ano_y.append(data_dict[i]) 
 
                 
                 
@@ -97,13 +132,37 @@ class skyline_calc():
         plt.subplot(3, 1, 1)
         plt.plot(data_time, data_value, linewidth=0.5)
         
-        plt.scatter(data1_ano_x, data1_ano_y, color='green', s=5)
-        plt.scatter(data2_ano_x, data2_ano_y, color='red', s=5)
+        #plt.scatter(data1_ano_x, data1_ano_y, color='green', s=5)
+        plt.scatter(data1_ano_x, data1_ano_y, color='red', s=5)
 
-        plt.ylabel('3月29日')
+        plt.ylabel('median_absolute_deviation')
         
         my_x_ticks = np.arange(0, 24, 1)
         plt.xticks(my_x_ticks)
+        
+        plt.subplot(3, 1, 2)
+        plt.plot(data_time, data_value, linewidth=0.5)
+        plt.plot(data2_ano_x_line, data2_ano_y_line, linewidth=0.5,color='red')
+        
+        #plt.scatter(data1_ano_x, data1_ano_y, color='green', s=5)
+        plt.scatter(data2_ano_x, data2_ano_y, color='red', s=5)
+
+        plt.ylabel('7选4')
+        
+        my_x_ticks = np.arange(0, 24, 1)
+        plt.xticks(my_x_ticks)
+        
+        plt.subplot(3, 1, 3)
+        plt.plot(data_time, data_value, linewidth=0.5)
+        plt.plot(data3_ano_x_line, data3_ano_y_line, linewidth=0.5,color='red')
+        
+        #plt.scatter(data1_ano_x, data1_ano_y, color='green', s=5)
+        plt.scatter(data3_ano_x, data3_ano_y, color='red', s=5)
+
+        plt.ylabel('ks_test')
+        
+        my_x_ticks = np.arange(0, 24, 1)
+        plt.xticks(my_x_ticks)             
  
 
         plt.show()
@@ -155,6 +214,44 @@ def median_absolute_deviation(timeseries):
     # 6 times bigger than the median
     if test_statistic > 6:
         return True
+    
+def median_absolute_deviation_down(timeseries):
+
+    series = pd.Series([x[1] for x in timeseries])
+    median = series.median()
+    demedianed = np.abs(series - median)
+    median_deviation = demedianed.median()
+    
+    mean = np.mean(series)
+
+    if median_deviation == 0:
+        return False
+
+    test_statistic = demedianed.iget(-1) / median_deviation
+
+    if test_statistic > 6 and series.iget(-1) < mean:
+        return True
+    else:
+        return False
+    
+def median_absolute_deviation_up(timeseries):
+
+    series = pd.Series([x[1] for x in timeseries])
+    median = series.median()
+    demedianed = np.abs(series - median)
+    median_deviation = demedianed.median()
+    
+    mean = np.mean(series)
+
+    if median_deviation == 0:
+        return False
+
+    test_statistic = demedianed.iget(-1) / median_deviation
+
+    if test_statistic > 6 and series.iget(-1) > mean:
+        return True
+    else:
+        return False    
 
 def timestamp0(timestamp):
     # 功能：计算某一固定时间点的日开始时间
@@ -249,5 +346,6 @@ def upanddown(timestamp,flag):
         return True
     else:
         return False
+
     
     

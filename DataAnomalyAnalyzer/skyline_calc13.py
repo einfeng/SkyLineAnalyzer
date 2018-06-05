@@ -35,11 +35,11 @@ class skyline_calc():
     def calc(self):
         load = ld.load_data()
         
-        data = load.csv('busi_yyt.csv')
+        data = load.csv('busi_hzs.csv')
         
         data_dict = dict(data)        
                 
-        starttime = 1522080000
+        starttime = 1522684800
         endtime = starttime + 60 * 60 * 24
         
         data_value = []
@@ -49,54 +49,53 @@ class skyline_calc():
         data1_ano_y = []
         
         data2_ano_x = []
-        data2_ano_y = []        
+        data2_ano_y = []
+        
+        data2_ano_x_line = []
+        data2_ano_y_line = []        
+        
+        data3_ano_x = []
+        data3_ano_y = []      
+        
+        data3_ano_x_line = []
+        data3_ano_y_line = []                 
         
         ano_count = 0
-        ano_count_new = 0
-        
-        ano_triger = False
-        ano_time = 0
-        ano_value = 0
-        
-        
+        ano_count_new = 0        
 
-        for i in range(starttime + 60 * 60, endtime, 60):
+        for i in range(starttime + 5 * 60, endtime, 60):
             data_value.append(data_dict[i])
             data_time.append(float((i - starttime)) / 3600)
             
             tmpdata = []
             tmpvalue = []
             
-            for j in range(i - 30 * 60, i + 60, 60):
+            for j in range(i - 5 * 60, i + 60, 60):
                 tmpdata.append((j, data_dict[j]))
-                tmpvalue.append(data_dict[j])                                        
-
-            anomalous = median_absolute_deviation(tmpdata)
+                tmpvalue.append(data_dict[j])
+                
+            data_max = np.max(dict(tmpdata).values())
+            data_min = np.min(tmpdata)
             
-            time_local = time.localtime(i)
+            print(data_max)             
             
-            if data_dict[i] > np.mean(tmpdata):
-                ano_triger = False
-
-            if anomalous:
+            if data_dict[j] < data_max * 0.5 or data_dict[j] > data_min * 1.5:
                 ano_count += 1
-                
-                if data_dict[i] > np.mean(tmpdata):
-                    ano_triger = False                
-                else:
-                    ano_triger = True
-                
                 data1_ano_x.append(float((i - starttime)) / 3600)
-                data1_ano_y.append(data_dict[i]) 
+                data1_ano_y.append(data_dict[i])     
                 
+                '''
                 # 异动点
                 if time_local[3] >= 7 and time_local[3] < 23:
                     data_filter = anomaly_filter(i, data)
                     if data_filter:
-                        if ano_triger==True:
+                        #if upanddown(tmpdata,1):
                             ano_count_new+=1
                             data2_ano_x.append(float((i - starttime)) / 3600)
                             data2_ano_y.append(data_dict[i])
+                '''
+              
+
 
                 
                 
@@ -108,13 +107,14 @@ class skyline_calc():
         plt.subplot(3, 1, 1)
         plt.plot(data_time, data_value, linewidth=0.5)
         
-        plt.scatter(data1_ano_x, data1_ano_y, color='green', s=5)
-        plt.scatter(data2_ano_x, data2_ano_y, color='red', s=5)
+        #plt.scatter(data1_ano_x, data1_ano_y, color='green', s=5)
+        plt.scatter(data1_ano_x, data1_ano_y, color='red', s=5)
 
-        plt.ylabel('3月29日')
+        plt.ylabel('4月1日-处理前')
         
         my_x_ticks = np.arange(0, 24, 1)
         plt.xticks(my_x_ticks)
+        
  
 
         plt.show()
@@ -166,6 +166,44 @@ def median_absolute_deviation(timeseries):
     # 6 times bigger than the median
     if test_statistic > 6:
         return True
+    
+def median_absolute_deviation_down(timeseries):
+
+    series = pd.Series([x[1] for x in timeseries])
+    median = series.median()
+    demedianed = np.abs(series - median)
+    median_deviation = demedianed.median()
+    
+    mean = np.mean(series)
+
+    if median_deviation == 0:
+        return False
+
+    test_statistic = demedianed.iget(-1) / median_deviation
+
+    if test_statistic > 6 and series.iget(-1) < mean:
+        return True
+    else:
+        return False
+    
+def median_absolute_deviation_up(timeseries):
+
+    series = pd.Series([x[1] for x in timeseries])
+    median = series.median()
+    demedianed = np.abs(series - median)
+    median_deviation = demedianed.median()
+    
+    mean = np.mean(series)
+
+    if median_deviation == 0:
+        return False
+
+    test_statistic = demedianed.iget(-1) / median_deviation
+
+    if test_statistic > 6 and series.iget(-1) > mean:
+        return True
+    else:
+        return False    
 
 def timestamp0(timestamp):
     # 功能：计算某一固定时间点的日开始时间

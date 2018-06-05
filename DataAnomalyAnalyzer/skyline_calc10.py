@@ -43,7 +43,7 @@ class skyline_calc():
         data_ano_x_new = []
         data_ano_y_new = []
         
-        for i in range(starttime + 60 * 60, endtime, 60):
+        for i in range(starttime + 30 * 60, endtime, 60):
             data_value.append(data_dict[i])
             data_time.append(float((i - starttime)) / 3600)
             
@@ -55,6 +55,8 @@ class skyline_calc():
                 tmpvalue.append(data_dict[j])
         
             anomalous, ensemble, datatime, datapoint = skyline_algorithms.run_selected_algorithm(tmpdata, 'test')
+
+            print(str(datatime) + ':' + str(ensemble))
 
             if anomalous:
                 # 异动点
