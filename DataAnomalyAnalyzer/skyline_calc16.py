@@ -38,7 +38,7 @@ class skyline_calc():
         
         print(busi_data)
 
-        print('xxxxxxxxxxxxxxxxxxxxxx')
+        print('xxxxxxxxxxxxxxxxxxxxxxccccccccccccccc')
         
         '''
         data_dict = dict(data)        
