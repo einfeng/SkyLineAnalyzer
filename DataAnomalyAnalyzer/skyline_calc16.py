@@ -37,8 +37,8 @@ class skyline_calc():
         busi_data = pd.read_csv('data/busi_yyt.csv', header=None, names=('time', 'value'), parse_dates=['time'], date_parser=(lambda x: pd.datetime.strptime(x, 'yyyy-mm-dd hh24:mi')))
         
         print(busi_data)
-        
-        print('xxxxx')
+
+        print('xxxxxxxx')
         
         '''
         data_dict = dict(data)        
