@@ -86,17 +86,9 @@ class skyline_calc():
             print('datatime:'+str(time.strftime("%Y-%m-%d %H:%M:%S",time_local)))
             print('datapoint:'+str(data_dict[i]))
 
+
             
-            mean_value = np.mean(dict(tmpdata).values())
-            data2_ano_x_line.append(float((i - starttime)) / 3600)
-            data2_ano_y_line.append(mean_value)
-            
-            #maxmin_value = (np.max(dict(tmpdata).values()) + np.min(dict(tmpdata).values()))/2
-            median = np.median(dict(tmpdata).values())
-            
-            data3_ano_x_line.append(float((i - starttime)) / 3600)
-            data3_ano_y_line.append(median)
-            
+
             if anomalous:
                 ano_count += 1
                 data1_ano_x.append(float((i - starttime)) / 3600)
@@ -112,15 +104,6 @@ class skyline_calc():
                             data2_ano_x.append(float((i - starttime)) / 3600)
                             data2_ano_y.append(data_dict[i])
                 '''
-                                
-            if anomalous1:
-                data2_ano_x.append(float((i - starttime)) / 3600)
-                data2_ano_y.append(data_dict[i])                   
-                 
-            if anomalous2:
-                
-                data3_ano_x.append(float((i - starttime)) / 3600)
-                data3_ano_y.append(data_dict[i]) 
 
                 
                 
@@ -202,7 +185,7 @@ def median_absolute_deviation(timeseries):
     if median_deviation == 0:
         return False
 
-    test_statistic = demedianed.iget(-1) / median_deviation
+    test_statistic = demedianed.iloc[-1] / median_deviation
 #     
 #     print('median:'+str(median))
 #  
