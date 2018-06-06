@@ -36,11 +36,11 @@ class skyline_calc():
     def calc(self):
         load = ld.load_data()
         
-        data = load.csv('busi_users.csv')
+        data = load.csv('busi_qs.csv')
         
         data_dict = dict(data)        
                 
-        starttime = 1522080000
+        starttime = 1522857600
         endtime = starttime + 60 * 60 * 24
         
         data_value = []
@@ -64,18 +64,18 @@ class skyline_calc():
         ano_count = 0
         ano_count_new = 0        
 
-        for i in range(starttime + 120 * 120, endtime, 120):
+        for i in range(starttime + 30 * 60, endtime, 60):
             data_value.append(data_dict[i])
             data_time.append(float((i - starttime)) / 3600)
             
             tmpdata = []
             tmpvalue = []
             
-            for j in range(i - 120 * 120, i + 120, 120):
+            for j in range(i - 30 * 60, i + 60, 60):
                 tmpdata.append((j, data_dict[j]))
                 tmpvalue.append(data_dict[j])
                 
-            anomalous = median_absolute_deviation(tmpdata)
+            anomalous = median_absolute_deviation_down(tmpdata)
             
             anomalous1 = median_absolute_deviation(tmpdata)
                         
@@ -135,7 +135,7 @@ class skyline_calc():
         #plt.scatter(data1_ano_x, data1_ano_y, color='green', s=5)
         plt.scatter(data1_ano_x, data1_ano_y, color='red', s=5)
 
-        plt.ylabel('median_absolute_deviation')
+        plt.ylabel('仅下降')
         
         my_x_ticks = np.arange(0, 24, 1)
         plt.xticks(my_x_ticks)
@@ -147,7 +147,7 @@ class skyline_calc():
         #plt.scatter(data1_ano_x, data1_ano_y, color='green', s=5)
         plt.scatter(data2_ano_x, data2_ano_y, color='red', s=5)
 
-        plt.ylabel('7选4')
+        plt.ylabel('全部异动点，带判断线')
         
         my_x_ticks = np.arange(0, 24, 1)
         plt.xticks(my_x_ticks)

@@ -8,11 +8,6 @@ def getLinearRegression(data):
     
     np_data = np.array(data)
     
-    '''
-    min_max_scaler = preprocessing.MinMaxScaler()
-    tmpdata_minmax = min_max_scaler.fit_transform(np_data)
-    '''
-    
     x = np_data[:, 0]
     y = np_data[:, 1]
         
