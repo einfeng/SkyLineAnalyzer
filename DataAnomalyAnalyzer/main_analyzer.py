@@ -4,14 +4,13 @@ Created on 2018年4月9日
 
 @author: zhao-PC
 '''
-from DataAnomalyAnalyzer.isolation_forest import isolation_forest
-from DataAnomalyAnalyzer import skyline_calc12
+from DataAnomalyAnalyzer import skyline_calc15
 
 if __name__ == '__main__':
 
     #isolation_forest().IsolationForest()
 
-    skyline_calc12.skyline_calc().calc()
+    skyline_calc15.calc()
     
     #c = dict(ld.load_data().json('esb_f.json'))
 
